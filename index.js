@@ -3,29 +3,34 @@ var _ = require('lodash');
 var request = require('request');
 var mustache = require('mustache');
 
-module.exports = function(AppID, AppSecret,WebhookSecret) {
-  AppID = AppID? AppID : process.env.APP_ID;
-  AppSecret = AppSecret? AppSecret : process.env.APP_SECRET;
-  WebhookSecret = WebhookSecret? WebhookSecret : process.env.WEBHOOK_SECRET;
-  return function(req,res,next) {
-    processEvent(AppID,AppSecret,WebhookSecret,req).then(response => {
-      sendResponse(res,response.response);
-      req.body = response.event;
-      next();
-    }).catch(err => {
-      sendResponse(err.response);
-    })
+module.exports = function(credentials) {
+  credentials = credentials ? credentials : {};
+  credentials.AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
+  credentials.AppSecret = credentials.AppSecret ? credentials.AppSecret : process.env.APP_SECRET;
+  credentials.WebhookSecret = credentials.WebhookSecret ? credentials.WebhookSecret : process.env.WEBHOOK_SECRET;
+  genToken(credentials);
+  return {
+    express: function(req,res,next) {
+      processEvent(credentials,req).then(response => {
+        sendResponse(res,response.response);
+        req.body = response.event;
+        next();
+      }).catch(err => {
+        sendResponse(err.response);
+      })
+    },
+    processEvent: processEvent
   }
 }
 
-function processEvent(AppID, AppSecret,WebhookSecret,req) {
+function processEvent(credentials,req) {
   return new Promise((resolve,reject) => {
-    if (WebhookSecret) {
+    if (credentials.WebhookSecret) {
       console.log("Inbound event");
       console.log("Body: " + JSON.stringify(req.body));
       console.log("Token: " + req.headers['x-outbound-token'] );
 
-      if (!validateSender(req,WebhookSecret)) {
+      if (!validateSender(req,credentials.WebhookSecret)) {
         console.log("Wrong Sender...")
         // res.status(400).send("Wrong Sender");
         reject({
@@ -40,7 +45,7 @@ function processEvent(AppID, AppSecret,WebhookSecret,req) {
         console.log("Correct sender");
         if (_.get(req.body, "type") === "verification") {
             console.log("Responding to Challenge");
-            var response = generateChallengeResponse(req.body, WebhookSecret);
+            var response = generateChallengeResponse(req.body, credentials.WebhookSecret);
             // res.setHeader("X-OUTBOUND-TOKEN",response.token);
             // res.statusCode = 200;
             // res.setHeader("Content-Type","text/plain; charset=utf-8");
@@ -54,7 +59,7 @@ function processEvent(AppID, AppSecret,WebhookSecret,req) {
               body: response.body
             });
         } else {
-          expandEvent(cleanUpEvent(req.body), AppID, AppSecret).then(event=> {
+          expandEvent(cleanUpEvent(req.body), credentials).then(event=> {
             console.log("it's some kind of event");
             console.log("Event: " + JSON.stringify(req.body));
             req.body = event;
@@ -62,7 +67,7 @@ function processEvent(AppID, AppSecret,WebhookSecret,req) {
               response: {
                 statusCode: 200,
                 headers: {
-                  "Content-Type": "application/json"
+                  "Content-Type": "text/plain; charset=utf-8"
                 },
                 body: "Got Event"
               },
@@ -144,12 +149,12 @@ var expansion = {
     "message-annotation-removed": annotationGQL,
 };
 
-function expandEvent(body,AppID,AppSecret) {
+function expandEvent(body,credentials) {
     return new Promise((resolve, reject) => {
       // Check to see if there is an expansion GraphQL expression to run
       if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
         var exp = expansion[body.type];
-        genToken(AppID,AppSecret).then(token => {
+        genToken(credentials).then(token => {
           request.post(
             'https://api.watsonwork.ibm.com/graphql', {
               headers: {
@@ -190,7 +195,7 @@ function cleanUpEvent(event) {
 var currentToken;
 var tokenExpiration = 0;
 
-function genToken(AppID, AppSecret) {
+function genToken(credentials) {
   return new Promise((resolve, reject) => {
     if (tokenExpiration > Date.now())
       resolve({
@@ -200,8 +205,8 @@ function genToken(AppID, AppSecret) {
     else {
       request.post('https://api.watsonwork.ibm.com/oauth/token', {
         auth: {
-          user: AppID,
-          pass: AppSecret
+          user: credentials.AppID,
+          pass: credentials.AppSecret
         },
         json: true,
         form: {
