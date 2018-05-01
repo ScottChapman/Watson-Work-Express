@@ -3,34 +3,34 @@ var _ = require('lodash');
 var request = require('request');
 var mustache = require('mustache');
 
-module.exports = function(credentials) {
+var AppID = process.env.APP_ID;
+var AppSecret = process.env.APP_SECRET;
+var WebhookSecret = process.env.WEBHOOK_SECRET;
+
+module.exports.express = function (credentials) {
   credentials = credentials ? credentials : {};
-  credentials.AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
-  credentials.AppSecret = credentials.AppSecret ? credentials.AppSecret : process.env.APP_SECRET;
-  credentials.WebhookSecret = credentials.WebhookSecret ? credentials.WebhookSecret : process.env.WEBHOOK_SECRET;
-  genToken(credentials);
-  return {
-    express: function(req,res,next) {
-      processEvent(credentials,req).then(response => {
-        sendResponse(res,response.response);
-        req.body = response.event;
-        next();
-      }).catch(err => {
-        sendResponse(err.response);
-      })
-    },
-    processEvent: processEvent
+  AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
+  AppSecret = credentials.AppSecret ? credentials.AppSecret : process.env.APP_SECRET;
+  WebhookSecret = credentials.WebhookSecret ? credentials.WebhookSecret : process.env.WEBHOOK_SECRET;
+  return function (req,res,next) {
+    processEvent(req).then(response => {
+      sendResponse(res,response.response);
+      req.body = response.event;
+      next();
+    }).catch(err => {
+      sendResponse(err.response);
+    })
   }
 }
 
-function processEvent(credentials,req) {
+function processEvent(req) {
   return new Promise((resolve,reject) => {
-    if (credentials.WebhookSecret) {
+    if (WebhookSecret) {
       console.log("Inbound event");
       console.log("Body: " + JSON.stringify(req.body));
       console.log("Token: " + req.headers['x-outbound-token'] );
 
-      if (!validateSender(req,credentials.WebhookSecret)) {
+      if (!validateSender(req)) {
         console.log("Wrong Sender...")
         // res.status(400).send("Wrong Sender");
         reject({
@@ -45,7 +45,7 @@ function processEvent(credentials,req) {
         console.log("Correct sender");
         if (_.get(req.body, "type") === "verification") {
             console.log("Responding to Challenge");
-            var response = generateChallengeResponse(req.body, credentials.WebhookSecret);
+            var response = generateChallengeResponse(req.body);
             // res.setHeader("X-OUTBOUND-TOKEN",response.token);
             // res.statusCode = 200;
             // res.setHeader("Content-Type","text/plain; charset=utf-8");
@@ -59,7 +59,7 @@ function processEvent(credentials,req) {
               body: response.body
             });
         } else {
-          expandEvent(cleanUpEvent(req.body), credentials).then(event=> {
+          expandEvent(cleanUpEvent(req.body)).then(event=> {
             console.log("it's some kind of event");
             console.log("Event: " + JSON.stringify(req.body));
             req.body = event;
@@ -108,21 +108,21 @@ function sendResponse(res,options) {
   res.status(options.statusCode).send(options.body);
 }
 
-function generateChallengeResponse(reqBody, secret) {
+function generateChallengeResponse(reqBody) {
   var body = {
       response: reqBody.challenge
   };
   var strBody = JSON.stringify(body);
-  var token = crypto.createHmac("sha256", secret).update(strBody).digest("hex");
+  var token = crypto.createHmac("sha256", WebhookSecret).update(strBody).digest("hex");
   return {
     token: token,
     body: strBody
   }
 }
 
-function validateSender(req, secret) {
+function validateSender(req) {
     var ob_token = req.headers["x-outbound-token"];
-    var calculated = crypto.createHmac("sha256", secret).update(JSON.stringify(req.body)).digest("hex");
+    var calculated = crypto.createHmac("sha256", WebhookSecret).update(JSON.stringify(req.body)).digest("hex");
     return ob_token == calculated;
 }
 
@@ -149,12 +149,12 @@ var expansion = {
     "message-annotation-removed": annotationGQL,
 };
 
-function expandEvent(body,credentials) {
+function expandEvent(body) {
     return new Promise((resolve, reject) => {
       // Check to see if there is an expansion GraphQL expression to run
       if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
         var exp = expansion[body.type];
-        genToken(credentials).then(token => {
+        genToken().then(token => {
           request.post(
             'https://api.watsonwork.ibm.com/graphql', {
               headers: {
@@ -195,7 +195,7 @@ function cleanUpEvent(event) {
 var currentToken;
 var tokenExpiration = 0;
 
-function genToken(credentials) {
+function genToken() {
   return new Promise((resolve, reject) => {
     if (tokenExpiration > Date.now())
       resolve({
@@ -205,8 +205,8 @@ function genToken(credentials) {
     else {
       request.post('https://api.watsonwork.ibm.com/oauth/token', {
         auth: {
-          user: credentials.AppID,
-          pass: credentials.AppSecret
+          user: AppID,
+          pass: AppSecret
         },
         json: true,
         form: {
@@ -227,3 +227,9 @@ function genToken(credentials) {
     }
   });
 }
+
+function resetToken() {
+  tokenExpiration = 0;
+}
+
+genToken();

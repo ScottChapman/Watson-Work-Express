@@ -8,12 +8,12 @@ npm install watson-work-express
 
 ## Use
 ```
-var WWHandler = require('watson-work-express')();
+var WWHandler = require('watson-work-express');
 ...
-app.use(WWHandler.express)
+app.use(WWHandler.express())
 ```
 
-Constructor takes optional argument:
+Express takes optional argument:
 ```
 {
   AppID: <App_ID>,
