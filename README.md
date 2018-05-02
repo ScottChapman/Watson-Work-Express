@@ -10,7 +10,7 @@ npm install watson-work-express
 ```
 var WWHandler = require('watson-work-express');
 ...
-app.use(WWHandler.express())
+app.use(WWHandler.express(<options>))
 ```
 
 Express takes optional argument:
