@@ -7,6 +7,7 @@ var AppID = process.env.APP_ID;
 var AppSecret = process.env.APP_SECRET;
 var WebhookSecret = process.env.WEBHOOK_SECRET;
 
+/* istanbul ignore next */
 module.exports.express = function (credentials) {
   credentials = credentials ? credentials : {};
   AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
@@ -25,13 +26,14 @@ module.exports.express = function (credentials) {
 
 function processEvent(req) {
   return new Promise((resolve,reject) => {
+    /* istanbul ignore else */
     if (WebhookSecret) {
-      console.log("Inbound event");
-      console.log("Body: " + JSON.stringify(req.body));
-      console.log("Token: " + req.headers['x-outbound-token'] );
+      // console.log("Inbound event");
+      // console.log("Body: " + JSON.stringify(req.body));
+      // console.log("Token: " + req.headers['x-outbound-token'] );
 
       if (!validateSender(req)) {
-        console.log("Wrong Sender...")
+        // console.log("Wrong Sender...")
         // res.status(400).send("Wrong Sender");
         reject({
           statusCode: 400,
@@ -42,9 +44,9 @@ function processEvent(req) {
         });
       }
       else {
-        console.log("Correct sender");
+        // console.log("Correct sender");
         if (_.get(req.body, "type") === "verification") {
-            console.log("Responding to Challenge");
+            // console.log("Responding to Challenge");
             var response = generateChallengeResponse(req.body);
             // res.setHeader("X-OUTBOUND-TOKEN",response.token);
             // res.statusCode = 200;
@@ -60,8 +62,8 @@ function processEvent(req) {
             });
         } else {
           expandEvent(cleanUpEvent(req.body)).then(event=> {
-            console.log("it's some kind of event");
-            console.log("Event: " + JSON.stringify(req.body));
+            // console.log("it's some kind of event");
+            // console.log("Event: " + JSON.stringify(req.body));
             req.body = event;
             resolve({
               response: {
@@ -73,9 +75,9 @@ function processEvent(req) {
               },
               event: event
             })
-          }).catch(err => {
-            console.log("Some kind of error occured");
-            console.dir(err);
+          }).catch( /* istanbul ignore next */ err => {
+            // console.log("Some kind of error occured");
+            // console.dir(err);
             reject({
               statusCode: 400,
               headers: {
@@ -90,7 +92,7 @@ function processEvent(req) {
         }
       }
     } else {
-      console.log("No Webhook Secret set...")
+      // console.log("No Webhook Secret set...")
       // res.status(400).send("No Webhook Secret set");
       reject({
         statusCode: 400,
@@ -103,6 +105,7 @@ function processEvent(req) {
   });
 }
 
+/* istanbul ignore next */
 function sendResponse(res,options) {
   res.set(options.headers);
   res.status(options.statusCode).send(options.body);
@@ -152,6 +155,7 @@ var expansion = {
 function expandEvent(body) {
     return new Promise((resolve, reject) => {
       // Check to see if there is an expansion GraphQL expression to run
+      /* istanbul ignore else */
       if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
         var exp = expansion[body.type];
         genToken().then(token => {
@@ -165,6 +169,7 @@ function expandEvent(body) {
               body: mustache.render(exp.GraphQLExpansion, body)
             }, (err, response) => {
               response.body = JSON.parse(response.body);
+              /* istanbul ignore if */
               if (err || response.statusCode !== 200 || response.body.hasOwnProperty("errors")) {
                 reject(response.body.errors);
               } else {
@@ -180,6 +185,7 @@ function expandEvent(body) {
 
 function cleanUpEvent(event) {
     // expand annotationPayload into JSON obejct if it exists.
+    /* istanbul ignore catch */
     try {
       event.annotationPayload = JSON.parse(event.annotationPayload);
     }

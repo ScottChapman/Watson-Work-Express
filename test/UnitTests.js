@@ -52,7 +52,7 @@ describe('Watson Work Express Package', function() {
   describe("cleanUpEvent", function() {
     it('Should expand annotation', function() {
       var body = JSON.parse(fs.readFileSync("./data/keywords_annotation.json"));
-      message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
+      var message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
       var resp = WWExpress.__get__("cleanUpEvent")(message.body);
       resp.annotationPayload.should.have.property("keywords");
     });
@@ -63,7 +63,7 @@ describe('Watson Work Express Package', function() {
     it('should return expanded annotation created event', function() {
       var body = JSON.parse(fs.readFileSync("./data/keywords_annotation.json"));
       var queryResponse = JSON.parse(fs.readFileSync("./data/graphql_response.json"));
-      message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
+      var message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
       var auth = nock("https://api.watsonwork.ibm.com")
         .post("/oauth/token")
         .once()
@@ -77,4 +77,68 @@ describe('Watson Work Express Package', function() {
       })
     });
   })
-});
+
+  describe("validateSender", function() {
+    it ('should validate successfully', function () {
+      var resp = WWExpress.__get__("validateSender")(message);
+      resp.should.equal(true);
+    })
+  })
+
+  describe("generateChallengeResponse", function() {
+    it ('should generate expected response', function () {
+      var resp = WWExpress.__get__("generateChallengeResponse")(message.body);
+      var body = JSON.parse(resp.body);
+      body.response.should.equal(challenge.challenge);
+    })
+  })
+
+  describe("processEvent", function() {
+    it ('fail validation', function () {
+      WWExpress.__with__({
+        validateSender: function() {
+          return false
+        }
+      })(function () {
+        WWExpress.__get__("processEvent")(message).catch(resp => {
+          resp.statusCode.should.equal(400);
+          resp.body.should.equal("Wrong Sender");
+        })
+      });
+    })
+
+    it ('Generate Challenge', function () {
+      WWExpress.__with__({
+        validateSender: function() {
+          return true
+        }
+      })(function () {
+        WWExpress.__get__("processEvent")(message).catch(resp => {
+          resp.statusCode.should.equal(200);
+          var body = JSON.parse(resp.body);
+          body.response.should.equal(challenge.challenge);
+        })
+      });
+    })
+
+    it ('Process Event', function () {
+      WWExpress.__with__({
+        validateSender: function() {
+          return true
+        },
+        cleanUpEvent: function (body) {
+          return body;
+        },
+        expandEvent: function (body) {
+          return Promise.resolve(body);
+        }
+      })(function () {
+        message.body.type = "message_added";
+        WWExpress.__get__("processEvent")(message).then(resp => {
+          resp.event.should.deep.equal(challenge);
+          resp.response.statusCode.should.equal(200);
+        })
+      });
+    })
+  })
+})
