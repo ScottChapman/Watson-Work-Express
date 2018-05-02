@@ -193,6 +193,7 @@ function cleanUpEvent(event) {
     catch (e) {}
 
     // Cleanup time field
+    /* istanbul ignore else */
     if (event.hasOwnProperty("time"))
       event.time = Date(event.time).toString();
 
