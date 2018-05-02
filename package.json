@@ -19,7 +19,7 @@
     "url": "git+https://github.com/ScottChapman/Watson-Work-Express.git"
   },
   "scripts": {
-    "unit": "(cd test; mocha *.js)",
+    "unit": "(cd tests; mocha *.js)",
     "old-coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "cover": "nyc --reporter=text --reporter=lcov npm test",
     "test": "nyc npm run unit",

@@ -5,7 +5,7 @@ var WWExpress = rewire("../index.js");
 var nock = require("nock");
 var util = require("./utils/utils.js");
 
-WWExpress.__set__("AppId", "some_id");
+WWExpress.__set__("AppID", "some_id");
 WWExpress.__set__("AppSecret", "some_secret");
 WWExpress.__set__("WebhookSecret", "some_other_secret");
 

@@ -9,6 +9,7 @@ var WebhookSecret = process.env.WEBHOOK_SECRET;
 
 /* istanbul ignore next */
 module.exports.express = function (credentials) {
+  genToken();
   credentials = credentials ? credentials : {};
   AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
   AppSecret = credentials.AppSecret ? credentials.AppSecret : process.env.APP_SECRET;
@@ -237,5 +238,3 @@ function genToken() {
 function resetToken() {
   tokenExpiration = 0;
 }
-
-genToken();
