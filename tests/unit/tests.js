@@ -1,9 +1,9 @@
 var should = require("chai").should();
 var fs = require("fs");
 var rewire = require('rewire');
-var WWExpress = rewire("../index.js");
+var WWExpress = rewire("../../index.js");
 var nock = require("nock");
-var util = require("./utils/utils.js");
+var util = require("../utils/utils.js");
 
 WWExpress.__set__("AppID", "some_id");
 WWExpress.__set__("AppSecret", "some_secret");
@@ -16,7 +16,8 @@ var challenge = {
 
 var message = util.generateEvent(challenge,WWExpress.__get__("WebhookSecret"));
 
-var authResp = JSON.parse(fs.readFileSync("./data/auth.json"));
+var authResp = JSON.parse(fs.readFileSync("../data/auth.json"));
+var sentMessageResp = JSON.parse(fs.readFileSync("../data/created_message.json"));
 
 describe('Watson Work Express Package', function() {
   describe('genToken', function() {
@@ -51,7 +52,7 @@ describe('Watson Work Express Package', function() {
 
   describe("cleanUpEvent", function() {
     it('Should expand annotation', function() {
-      var body = JSON.parse(fs.readFileSync("./data/keywords_annotation.json"));
+      var body = JSON.parse(fs.readFileSync("../data/keywords_annotation.json"));
       var message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
       var resp = WWExpress.__get__("cleanUpEvent")(message.body);
       resp.annotationPayload.should.have.property("keywords");
@@ -61,8 +62,8 @@ describe('Watson Work Express Package', function() {
 
   describe("expandEvent", function() {
     it('should return expanded annotation created event', function() {
-      var body = JSON.parse(fs.readFileSync("./data/keywords_annotation.json"));
-      var queryResponse = JSON.parse(fs.readFileSync("./data/graphql_response.json"));
+      var body = JSON.parse(fs.readFileSync("../data/keywords_annotation.json"));
+      var queryResponse = JSON.parse(fs.readFileSync("../data/graphql_response.json"));
       var message = util.generateEvent(body,WWExpress.__get__("WebhookSecret"));
       var auth = nock("https://api.watsonwork.ibm.com")
         .post("/oauth/token")
@@ -140,5 +141,25 @@ describe('Watson Work Express Package', function() {
         })
       });
     })
+
+    it('should return Sent Message', function() {
+      var auth = nock("https://api.watsonwork.ibm.com")
+        .post("/v1/spaces/spaceID/messages")
+        .once()
+        .reply(201,sentMessageResp);
+      return WWExpress.__get__("sendMessage")("spaceID",{}).then(resp => {
+        resp.should.be.deep.equal(sentMessageResp);
+      })
+    });
+
+    it('should fail Send Message', function() {
+      var auth = nock("https://api.watsonwork.ibm.com")
+        .post("/v1/spaces/spaceID/messages")
+        .once()
+        .reply(401,sentMessageResp);
+      return WWExpress.__get__("sendMessage")("spaceID",{}).catch(resp => {
+        resp.should.be.equal(401);
+      })
+    });
   })
 })

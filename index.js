@@ -36,11 +36,13 @@ var messageDefaults = {
 }
 
 function setMessageDefaults(def) {
+  /* istanbul ignore next */
   _.merge(messageDefaults,def);
 }
 
 function sendMessage(spaceId, message) {
   return new Promise(function(success, failure) {
+    /* istanbul ignore catch */
     genToken().then(token => {
       var annotation = _.merge(messageDefaults,message);
       request.post(
@@ -55,12 +57,13 @@ function sendMessage(spaceId, message) {
             annotations: [ annotation ]
           }
         }, (err, res) => {
+          /* istanbul ignore next */
           if (err || res.statusCode !== 201) {
             failure(res.statusCode);
           }
           success(res.body);
         });
-    }).catch(err => {
+    }).catch(/* istanbul ignore next */err => {
       failure(err);
     })
   })
@@ -79,13 +82,14 @@ function graphQL(query) {
           body: query
         }, (err, response) => {
           response.body = JSON.parse(response.body);
+          /* istanbul ignore next */
           if (err || response.statusCode !== 200 || response.body.hasOwnProperty("errors")) {
             failure(response.body.errors);
           } else {
             success(response.body);
           }
         });
-    }).catch(err => {
+    }).catch(/* istanbul ignore next */ err => {
       failure(err);
     });
   });
@@ -236,11 +240,10 @@ function expandEvent(body) {
 
 function cleanUpEvent(event) {
     // expand annotationPayload into JSON obejct if it exists.
-    /* istanbul ignore catch */
     try {
       event.annotationPayload = JSON.parse(event.annotationPayload);
     }
-    catch (e) {}
+    catch (/* istanbul ignore next */ e) {}
 
     // Cleanup time field
     /* istanbul ignore else */
@@ -254,6 +257,7 @@ var currentToken;
 var tokenExpiration = 0;
 
 function genToken() {
+  /* istanbul ignore next */
   if (!AppID || ! AppSecret) {
     Promise.reject("Missing AppID and/or AppSecret")
   }
