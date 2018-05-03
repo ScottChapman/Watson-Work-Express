@@ -8,7 +8,7 @@ var AppSecret = process.env.APP_SECRET;
 var WebhookSecret = process.env.WEBHOOK_SECRET;
 
 /* istanbul ignore next */
-module.exports.express = function (credentials) {
+function express(credentials) {
   genToken();
   credentials = credentials ? credentials : {};
   AppID = credentials.AppID ? credentials.AppID : process.env.APP_ID;
@@ -20,9 +20,75 @@ module.exports.express = function (credentials) {
       req.body = response.event;
       next();
     }).catch(err => {
-      sendResponse(err.response);
+      sendResponse(res,err);
     })
   }
+}
+var messageDefaults = {
+  type: 'generic',
+  version: 1.0,
+  color: '#6CB7FB',
+  title: "title",
+  text: "text",
+  actor: {
+    name: 'Watson Work Bot',
+  }
+}
+
+function setMessageDefaults(def) {
+  _.merge(messageDefaults,def);
+}
+
+function sendMessage(spaceId, message) {
+  return new Promise(function(success, failure) {
+    genToken().then(token => {
+      var annotation = _.merge(messageDefaults,message);
+      request.post(
+        'https://api.watsonwork.ibm.com/v1/spaces/' + spaceId + '/messages', {
+          headers: {
+            Authorization: 'Bearer ' + token.jwt
+          },
+          json: true,
+          body: {
+            type: 'appMessage',
+            version: 1.0,
+            annotations: [ annotation ]
+          }
+        }, (err, res) => {
+          if (err || res.statusCode !== 201) {
+            failure(res.statusCode);
+          }
+          success(res.body);
+        });
+    }).catch(err => {
+      failure(err);
+    })
+  })
+}
+
+function graphQL(query) {
+  return new Promise(function(success, failure) {
+    genToken().then(token => {
+      request.post(
+        'https://api.watsonwork.ibm.com/graphql', {
+          headers: {
+            'Content-Type': 'application/graphql',
+            'Authorization': 'Bearer ' + token.jwt,
+            'x-graphql-view': 'TYPED_ANNOTATIONS,BETA,PUBLIC'
+          },
+          body: query
+        }, (err, response) => {
+          response.body = JSON.parse(response.body);
+          if (err || response.statusCode !== 200 || response.body.hasOwnProperty("errors")) {
+            failure(response.body.errors);
+          } else {
+            success(response.body);
+          }
+        });
+    }).catch(err => {
+      failure(err);
+    });
+  });
 }
 
 function processEvent(req) {
@@ -154,33 +220,17 @@ var expansion = {
 };
 
 function expandEvent(body) {
-    return new Promise((resolve, reject) => {
-      // Check to see if there is an expansion GraphQL expression to run
-      /* istanbul ignore else */
-      if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
-        var exp = expansion[body.type];
-        genToken().then(token => {
-          request.post(
-            'https://api.watsonwork.ibm.com/graphql', {
-              headers: {
-                'Content-Type': 'application/graphql',
-                'Authorization': 'Bearer ' + token.jwt,
-                'x-graphql-view': 'TYPED_ANNOTATIONS,BETA,PUBLIC'
-              },
-              body: mustache.render(exp.GraphQLExpansion, body)
-            }, (err, response) => {
-              response.body = JSON.parse(response.body);
-              /* istanbul ignore if */
-              if (err || response.statusCode !== 200 || response.body.hasOwnProperty("errors")) {
-                reject(response.body.errors);
-              } else {
-                resolve(_.merge(body, response.body.data));
-              }
-            });
-          });
-      } else {
-        resolve(body);
-      }
+  return new Promise((resolve, reject) => {
+    // Check to see if there is an expansion GraphQL expression to run
+    /* istanbul ignore else */
+    if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
+      var exp = expansion[body.type];
+      graphQL(mustache.render(exp.GraphQLExpansion, body)).then(resp => {
+        resolve(_.merge(body, resp.data));
+      })
+    } else {
+      resolve(body);
+    }
   });
 }
 
@@ -204,6 +254,9 @@ var currentToken;
 var tokenExpiration = 0;
 
 function genToken() {
+  if (!AppID || ! AppSecret) {
+    Promise.reject("Missing AppID and/or AppSecret")
+  }
   return new Promise((resolve, reject) => {
     if (tokenExpiration > Date.now())
       resolve({
@@ -238,4 +291,11 @@ function genToken() {
 
 function resetToken() {
   tokenExpiration = 0;
+}
+
+module.exports = {
+  express: express,
+  sendMessage: sendMessage,
+  setMessageDefaults: setMessageDefaults,
+  graphQL: graphQL
 }
