@@ -26,3 +26,6 @@ default values are obtained through environment variables:
 * APP_ID
 * APP_SECRET
 * WEBHOOK_SECRET
+
+## Example
+See [Example](./example).
