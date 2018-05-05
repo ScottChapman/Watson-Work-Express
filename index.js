@@ -6,6 +6,8 @@ var mustache = require('mustache');
 var AppID = process.env.APP_ID;
 var AppSecret = process.env.APP_SECRET;
 var WebhookSecret = process.env.WEBHOOK_SECRET;
+const NodeCache = require( "node-cache" );
+const messageCache = new NodeCache( { stdTTL: 120, checkperiod: 240 } );
 
 /* istanbul ignore next */
 function express(credentials) {
@@ -225,15 +227,21 @@ var expansion = {
 
 function expandEvent(body) {
   return new Promise((resolve, reject) => {
-    // Check to see if there is an expansion GraphQL expression to run
-    /* istanbul ignore else */
-    if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
-      var exp = expansion[body.type];
-      graphQL(mustache.render(exp.GraphQLExpansion, body)).then(resp => {
-        resolve(_.merge(body, resp.data));
-      })
-    } else {
-      resolve(body);
+    var cached = messageCache.get(body.messageId);
+    if (cached)
+      resolve(cached);
+    else {
+      // Check to see if there is an expansion GraphQL expression to run
+      /* istanbul ignore else */
+      if (body.hasOwnProperty("type") && expansion.hasOwnProperty(body.type)) {
+        var exp = expansion[body.type];
+        graphQL(mustache.render(exp.GraphQLExpansion, body)).then(resp => {
+          messageCache.set(body.messageId, resp.data);
+          resolve(_.merge(body, resp.data));
+        })
+      } else {
+        resolve(body);
+      }
     }
   });
 }

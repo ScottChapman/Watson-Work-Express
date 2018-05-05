@@ -1,13 +1,13 @@
 var app = require('express')();
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
-// var WWHandler = require("watson-work-express")();
 var WWExpress = require("watson-work-express");
 
 app.use(bodyParser.json());
 app.use(bodyParser.text());
-app.use(WWExpress.express());
+app.use(WWExpress.express()); // add Watson Work Express Middleware
 
+// Set defaults for send Message
 WWExpress.setMessageDefaults(
   {
     title: "Hello World",
@@ -17,6 +17,7 @@ WWExpress.setMessageDefaults(
   }
 )
 
+// Listen for "Hello World" messages, and respond with "Hello yourself!"
 app.post('/webhook', function(req, res){
   var event = req.body;
   if (event.type === "message-created") {

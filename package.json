@@ -1,6 +1,6 @@
 {
   "name": "watson-work-express",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Express class for use with Watson Work",
   "keywords": [
     "Watson",
@@ -30,6 +30,7 @@
     "crypto": "^1.0.1",
     "lodash": "^4.17.10",
     "mustache": "^2.3.0",
+    "node-cache": "^4.2.0",
     "request": "^2.85.0"
   },
   "devDependencies": {
