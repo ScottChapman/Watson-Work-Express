@@ -1,6 +1,6 @@
 {
   "name": "watson-work-express",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Express class for use with Watson Work",
   "keywords": [
     "Watson",
@@ -28,13 +28,20 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "crypto": "^1.0.1",
+    "eventemitter2": "^5.0.1",
+    "image-size": "^0.6.2",
     "lodash": "^4.17.10",
     "mustache": "^2.3.0",
     "node-cache": "^4.2.0",
-    "request": "^2.85.0"
+    "request": "^2.85.0",
+    "request-debug": "^0.2.0",
+    "request-promise": "^4.2.2",
+    "timer-machine": "^1.1.0",
+    "winston": "^2.4.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.1.1",
@@ -43,5 +50,11 @@
     "nyc": "^11.7.1",
     "rewire": "^4.0.1",
     "sinon": "^5.0.1"
+  },
+  "nyc": {
+    "include": [
+      "models/*.js",
+      "index.js"
+    ]
   }
 }

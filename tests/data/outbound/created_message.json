@@ -1,0 +1,22 @@
+{
+  "id": "messageId5",
+  "version": 1,
+  "type": "appMessage",
+  "created": "2018-05-31T18:41:02.079+0000",
+  "createdBy": "userId1",
+  "annotations": [
+    {
+      "type": "generic",
+      "version": 1,
+      "color": "#6CB7FB",
+      "title": "Hello World",
+      "text": "Test from Express!",
+      "actor": {
+        "name": "Hello World Bot"
+      },
+      "annotationId": "annotationId5",
+      "created": "2018-05-31T18:41:02.079+0000",
+      "createdBy": "userId1"
+    }
+  ]
+}

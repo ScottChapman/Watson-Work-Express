@@ -1,0 +1,12 @@
+{
+  "spaceName": "ScottsSpace",
+  "spaceId": "spaceId1",
+  "annotationPayload": "{\"language\":\"en\",\"keywords\":[{\"relevance\":0.91615,\"text\":\"test\"}]}",
+  "messageId": "messageId1",
+  "annotationType": "generic",
+  "annotationId": "annotationId1",
+  "time": 1521738363902,
+  "type": "message-annotation-added",
+  "text": "this is a message",
+  "userId": "someUserId1"
+}

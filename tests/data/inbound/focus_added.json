@@ -1,0 +1,12 @@
+{
+  "spaceName": "ScottWWExpress",
+  "spaceId": "spaceId1",
+  "annotationPayload": "{\"type\":\"message-focus\",\"annotationId\":null,\"type\":\"message-focus\",\"version\":\"5\",\"created\":null,\"createdBy\":null,\"updated\":null,\"updatedBy\":null,\"tokenClientId\":null,\"applicationId\":\"CLE\",\"lensId\":\"CLE\",\"lens\":\"Question\",\"category\":null,\"phrase\":\"is this a good question?\",\"actions\":null,\"confidence\":1.0,\"payload\":null,\"start\":0,\"end\":24,\"focusVersion\":5,\"hidden\":false,\"context\":null,\"extractedInfo\":{\"dates\":[],\"entities\":[],\"keywords\":[{\"text\":\"good question\",\"relevance\":0.962059}]}}",
+  "messageId": "messageId2",
+  "annotationType": "message-focus",
+  "annotationId": "annotationId2",
+  "time": 1527789263735,
+  "payload": "{\"key\":\"value\"}",
+  "type": "message-annotation-added",
+  "userId": "toscana-aip-nlc-consumer-client-id"
+}

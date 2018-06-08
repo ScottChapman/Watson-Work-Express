@@ -1,0 +1,9 @@
+{
+  "spaceId": "spaceId1",
+  "reaction": "👍",
+  "time": 1527789850554,
+  "type": "reaction-added",
+  "userId": "userId1",
+  "objectId": "objectId1",
+  "objectType": "MESSAGE"
+}

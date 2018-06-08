@@ -1,0 +1,10 @@
+{
+  "spaceName": "ScottsSpace",
+  "spaceId": "spaceId1",
+  "messageId": "messageId1",
+  "time": 1521738363529,
+  "type": "message-created",
+  "userId": "userId1",
+  "contentType": "text/markdown",
+  "content": ""
+}

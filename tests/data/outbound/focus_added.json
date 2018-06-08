@@ -1,0 +1,11 @@
+{
+  "message": {
+    "id": "messageId8",
+    "annotations": [
+      "{\"type\":\"generic\",\"version\":1,\"color\":\"#6CB7FB\",\"title\":\"Hello World\",\"text\":\"Test from Express!\",\"actor\":{\"name\":\"Hello World Bot\"},\"annotationId\":\"5b1560a3e4b04e433fa8b849\",\"created\":1528127651602,\"createdBy\":\"0d00981e-eff2-4e84-88c0-6b1c76fa5801\"}",
+      "{\"language\":\"en\",\"keywords\":[{\"relevance\":0.919195,\"text\":\"Test\"},{\"relevance\":0.911249,\"text\":\"Express\"}],\"annotationId\":\"5b1560a4e4b0efbd572ea915\",\"created\":1528127652402,\"createdBy\":\"toscana-aip-nlc-consumer-client-id\",\"type\":\"message-nlp-keywords\"}",
+      "{\"language\":\"en\",\"docSentiment\":{\"score\":0.0,\"type\":\"neutral\"},\"annotationId\":\"annotationId8\",\"created\":1528127652402,\"createdBy\":\"toscana-aip-nlc-consumer-client-id\",\"type\":\"message-nlp-docSentiment\"}",
+      "{\"type\":\"message-focus\",\"annotationId\":\"annotationId8\",\"version\":\"1\",\"created\":1528127654964,\"createdBy\":\"0d00981e-eff2-4e84-88c0-6b1c76fa5801\",\"updated\":null,\"updatedBy\":null,\"tokenClientId\":null,\"applicationId\":\"0d00981e-eff2-4e84-88c0-6b1c76fa5801\",\"lensId\":null,\"lens\":\"MyLens\",\"category\":\"MyCategory\",\"phrase\":\"Express\",\"actions\":[\"OneAction\"],\"confidence\":0.99,\"payload\":\"{\\\"key\\\":\\\"value\\\"}\",\"start\":10,\"end\":17,\"focusVersion\":1,\"hidden\":false,\"context\":null,\"extractedInfo\":null}"
+    ]
+  }
+}

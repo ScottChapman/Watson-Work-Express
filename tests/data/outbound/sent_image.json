@@ -1,0 +1,15 @@
+{
+  "id": "imageId1",
+  "name": "blank.jpeg",
+  "size": 1389,
+  "urls": {
+    "metadata": "url1",
+    "noredirect_download": "url2",
+    "redirect_download": "url3"
+  },
+  "created": 1527793897000,
+  "createdBy": "userId1",
+  "contentType": "image/jpeg",
+  "scanStatus": "UNKNOWN",
+  "lastScan": 0
+}
