@@ -70,6 +70,10 @@ class Message extends Event {
 
     var pos = this.content.indexOf(phrase);
 
+    if (pos < 0) {
+      throw new Error("Phrase does not exist in message")
+    }
+
     /* istanbul ignore else */
     if (typeof payload === "object")
       payload = JSON.stringify(payload).replace(/"/g,'\\"');
