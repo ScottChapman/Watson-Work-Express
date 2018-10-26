@@ -8,7 +8,7 @@ var utils = require('../utils.js');
 var emitter = new utils.emitterStub();
 Focus.__set__("emitter", emitter);
 
-var focusData = JSON.parse(fs.readFileSync('../data/inbound/focus_added.json'));
+var focusData = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/focus_added.json'));
 
 describe('Focus class', function() {
   describe('Constructor', function() {

@@ -10,9 +10,9 @@ var emitter = new utils.emitterStub();
 Space.__set__("emitter", emitter);
 
 var spaceUtils = Space.__get__("utils");
-var memberAdded = JSON.parse(fs.readFileSync('../data/inbound/member_added.json'));
-var memberAddedResult = JSON.parse(fs.readFileSync('../data/outbound/created_message.json'));
-var sentImageResult = JSON.parse(fs.readFileSync('../data/outbound/sent_image.json'));
+var memberAdded = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/member_added.json'));
+var memberAddedResult = JSON.parse(fs.readFileSync(__dirname + '/../data/outbound/created_message.json'));
+var sentImageResult = JSON.parse(fs.readFileSync(__dirname + '/../data/outbound/sent_image.json'));
 var fakeSentMessage = sinon.fake.resolves(memberAddedResult);
 var fakeSentImage = sinon.fake.resolves(sentImageResult);
 Space.__set__("graphQL", function() {
@@ -54,7 +54,7 @@ describe('Space class', function() {
   it('sendFile default size', async function() {
     var space = await Space.get(memberAdded.spaceId);
     sinon.replace(spaceUtils,"sendRequest",fakeSentImage);
-    var result = await space.sendFile("../data/inbound/blank.jpeg");
+    var result = await space.sendFile(__dirname + "/../data/inbound/blank.jpeg");
     sinon.restore();
     result.should.be.an('object');
   });
@@ -62,7 +62,7 @@ describe('Space class', function() {
   it('sendFile specific size', async function() {
     var space = await Space.get(memberAdded.spaceId);
     sinon.replace(spaceUtils,"sendRequest",fakeSentImage);
-    var result = await space.sendFile("../data/inbound/blank.jpeg",185,189);
+    var result = await space.sendFile(__dirname + "/../data/inbound/blank.jpeg",185,189);
     sinon.restore();
     result.should.be.an('object');
   });

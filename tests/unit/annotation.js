@@ -9,7 +9,7 @@ var emitter = new utils.emitterStub();
 Annotation.__set__("emitter", emitter);
 Annotation.__set__("Message", new utils.messageStub());
 
-var annotationData = JSON.parse(fs.readFileSync('../data/inbound/keywords_annotation.json'));
+var annotationData = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/keywords_annotation.json'));
 
 describe('Annotation class', function() {
   describe('Constructor', function() {

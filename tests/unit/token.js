@@ -11,7 +11,7 @@ var challenge = {
 
 var message = utils.generateEvent(challenge);
 
-var authResp = JSON.parse(fs.readFileSync("../data/auth.json"));
+var authResp = JSON.parse(fs.readFileSync(__dirname + "/../data/auth.json"));
 
 describe('Token class', function() {
   describe('genToken', function() {

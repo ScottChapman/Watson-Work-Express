@@ -8,7 +8,7 @@ var utils = require('../utils.js');
 var emitter = new utils.emitterStub();
 Reaction.__set__("emitter", emitter);
 
-var reactionData = JSON.parse(fs.readFileSync('../data/inbound/reaction.json'));
+var reactionData = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/reaction.json'));
 
 describe('Focus class', function() {
   describe('Constructor', function() {

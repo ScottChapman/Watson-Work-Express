@@ -1,4 +1,5 @@
-var should = require("chai").should();
+var chai = require("chai").use(require('chai-as-promised'));
+var should = chai.should();
 var rewire = require('rewire');
 var Message = rewire("../../models/message.js");
 var Annotation = require("../../models/annotation.js");
@@ -9,10 +10,10 @@ var logger = require('winston');
 
 logger.level = 'error';
 
-var annotationData = JSON.parse(fs.readFileSync('../data/inbound/keywords_annotation.json'));
-var messageData = JSON.parse(fs.readFileSync('../data/inbound/created_message.json'));
-var messageWithAnnotation = JSON.parse(fs.readFileSync('../data/inbound/keywords_annotation.json'));
-var addFocus = JSON.parse(fs.readFileSync('../data/outbound/focus_added.json'));
+var annotationData = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/keywords_annotation.json'));
+var messageData = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/created_message.json'));
+var messageWithAnnotation = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/keywords_annotation.json'));
+var addFocus = JSON.parse(fs.readFileSync(__dirname + '/../data/outbound/focus_added.json'));
 messageWithAnnotation.annotations = [];
 messageWithAnnotation.annotations.push(JSON.stringify(annotationData));
 
@@ -64,8 +65,18 @@ describe('Message class', function() {
   it('addFocus', async function() {
     var message = new Message(messageData);
     setGraphQLToFocusAdded();
+    message.content = "This is a nice Express package!"
     var newMessage = await message.addFocus("Express","MyLens","MyCategory","OneAction",{key: "value"},false);
     newMessage.addMessageFocus.message.should.have.property("messageId",addFocus.message.messageId);
+    setGraphQLToMessageQuery();
+    return true;
+  });
+
+  it('addFocus - phrase not found', async function() {
+    var message = new Message(messageData);
+    setGraphQLToFocusAdded();
+    message.content = ""
+    message.addFocus("Express","MyLens","MyCategory","OneAction",{key: "value"},false).should.be.rejectedWith('Phrase not found in message');
     setGraphQLToMessageQuery();
     return true;
   });

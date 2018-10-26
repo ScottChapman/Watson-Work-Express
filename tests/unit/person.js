@@ -10,7 +10,7 @@ var utils = require('../utils.js');
 var emitter = new utils.emitterStub();
 Person.__set__("emitter", emitter);
 
-var personResult = JSON.parse(fs.readFileSync('../data/inbound/person.json'));
+var personResult = JSON.parse(fs.readFileSync(__dirname + '/../data/inbound/person.json'));
 Person.__set__("graphQL", function() {
   return {
     data: {
